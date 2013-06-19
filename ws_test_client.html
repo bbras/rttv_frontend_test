@@ -10,17 +10,17 @@ ok{
 ohno{
 	color:red;
 }
+.item { width: 50%; }
+.item.w2 { width: 45%; }
 
 svg {
   font: 10px sans-serif;
 }
-
 .line {
   fill: none;
   stroke: #000;
   stroke-width: 1.5px;
 }
-
 .axis path, .axis line {
   fill: none;
   stroke: #000;
@@ -30,12 +30,14 @@ svg {
 <title>Flight Data Test</title>
 <script src="http://code.jquery.com/jquery.min.js"></script>
 <script src="http://mbostock.github.com/d3/d3.js?2.7.2"></script>
+<script src="http://masonry.desandro.com/masonry.pkgd.min.js"></script>
 </head>
 <body>
-<h1 id="locked"></h1>
-<h1 id="gps"></h1>
-<h1 id="acceleration"></h1>
-<h1 id="roll"></h1>
+	<div id="container" class="js-masonry" data-masonry-options='{ "columnWidth": 30, "itemSelector": ".item" }'>
+  	<div class="item"><h1 id="locked">Gps lock & rocket ready</h1></div>
+  	<div class="item w2"><h1 id="gps">Gps Data</h1></div>
+  	<div class="item"><h1 id="acceleration">Acceleration Data<br><br><br><br></h1></div>
+  </div>
 </body>
 </html>
 
@@ -96,7 +98,7 @@ function tick() {
   path
       .attr("d", line)
       .attr("transform", null)
-    .transition()
+    	.transition()
       .duration(200)
       .ease("linear")
       .attr("transform", "translate(" + x(-1) + ")")
@@ -117,7 +119,6 @@ $(function () {
 	log = document.getElementById('locked');
 	gps = document.getElementById('gps');
 	acc = document.getElementById('acceleration');
-	rol = document.getElementById('roll');
 	
 	connection.onopen = function () {
 		connection.send('Client Connected');
@@ -134,25 +135,27 @@ $(function () {
 		// try to decode json (I assume that each message from server is json)
 		try {
 			var json = JSON.parse(message.data);
-			var time = json.time;
-			var latlong = 'Lat: ' + json.latitude.toFixed(3) + ' Long: ' + json.longitude.toFixed(3);
-			var acceleration = 'Acceleration: ' + json.acceleration.toFixed(2);
-			var roll = 'Roll: ' + json.roll.toFixed(2);
 			var ready = 'and <ok>ready</ok>.';
 			if (json.ready == 0){
 				ready = 'but <ohno>not ready</ohno>.';
 			}
+			var time = json.time;
+			var gpsdata = 'Lat: ' + json.Latitude.toFixed(3) + ' Long: ' + json.Longitude.toFixed(3) + '<br>Height: ' + json.Height.toFixed(3) + 
+				'<br>NavMode: ' + json.NavMode + '<br>Number of Satellites: ' + json.NumOfSats;
+			var acceleration = 'Acceleration: X ' + json.AccelerationX.toFixed(2) + 
+				'<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Y ' + json.AccelerationY.toFixed(2) + 
+				'<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Z ' + json.AccelerationZ.toFixed(2) + 
+				'<br>Magnitude: ' + json.Magnitude.toFixed(2);
 			
-			log.innerHTML = 'Rocket is <ok>locked</ok> ' + ready + ' &nbsp; ' + time;
-			gps.innerHTML = latlong;
+			log.innerHTML = 'Rocket is <ok>locked</ok> ' + ready + ' ' + time;
+			gps.innerHTML = gpsdata;
 			acc.innerHTML = acceleration;
-			rol.innerHTML = roll;
 		} catch (e) {
 			console.log('This doesn\'t look like a valid JSON: ', message.data);
 			return;
 		}
 		//send data to graph
-		data.push(json.acceleration.toFixed(2));
+		data.push(json.Magnitude.toFixed(2));
 		tick();
 	};
 	

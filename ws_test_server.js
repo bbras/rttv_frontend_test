@@ -13,10 +13,15 @@ wss.on('connection', function(ws) {
 		tojson.time = time;
 		tojson.locked = 1;
 		tojson.ready = 1;
-		tojson.latitude = Math.random()*100;
-		tojson.longitude = Math.random()*100;
-		tojson.acceleration = Math.random()*100;
-		tojson.roll = Math.random()*100;
+		tojson.Latitude = Math.random()*100;
+		tojson.Longitude = Math.random()*100;
+		tojson.Height = Math.random()*1000;
+		tojson.NavMode = 2;
+		tojson.NumOfSats = 9;
+		tojson.AccelerationX = Math.random()*50;
+		tojson.AccelerationY = Math.random()*50;
+		tojson.AccelerationZ = Math.random()*50;
+		tojson.Magnitude = Math.sqrt(Math.pow(tojson.AccelerationX,2)+Math.pow(tojson.AccelerationY,2)+Math.pow(tojson.AccelerationZ,2));
 		
 		ws.send(JSON.stringify(tojson), function() { /* ignore errors */ });
 	}, 100);
